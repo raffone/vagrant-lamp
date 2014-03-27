@@ -41,8 +41,16 @@ rescue
 end
 
 # Configure sites
+cookbook_file "/etc/hosts" do
+  source "hosts"
+  owner "root"
+  group "root"
+  mode "0644"
+  action :create
+end
 sites.each do |name|
   site = data_bag_item("sites", name)
+  site["aliases"] = site["aliases"] ? site["aliases"] : []
 
   # Add site to apache config
   web_app site["host"] do
@@ -50,7 +58,7 @@ sites.each do |name|
     server_name site["host"]
     server_aliases site["aliases"]
     server_include site["include"]
-    docroot site["docroot"]?site["docroot"]:"/vagrant/public/#{site["host"]}"
+    docroot site["docroot"]?site["docroot"]:"/vagrant/sites/#{site["id"]}"
   end
 
    # Add site info in /etc/hosts
