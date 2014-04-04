@@ -32,6 +32,9 @@ execute "make-ssl-cert" do
   action :nothing
 end
 
+# Disable keepalive
+node['apache']['keepalive'] = "Off"
+
 # Initialize sites data bag
 sites = []
 begin
