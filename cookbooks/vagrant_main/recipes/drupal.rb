@@ -1,2 +1,2 @@
 include_recipe "php"
-include_recipe "drush"
+#include_recipe "drush"
