@@ -25,29 +25,15 @@ Vagrant.configure("2") do |config|
   config.vm.network :private_network, ip: "192.168.33.10"
 
   # Set share folder permissions to 777 so that apache can write files
-  config.vm.synced_folder ".", "/vagrant", type: "nfs"
+  config.vm.synced_folder ".", "/vagrant", type: "nfs", mount_options: ['rw', 'vers=3', 'tcp', 'fsc']  # the fsc is for cachedfilesd
 
   # Provider-specific configuration so you can fine-tune VirtualBox for Vagrant.
   # These expose provider-specific options.
   config.vm.provider "virtualbox" do |v|
-    host = RbConfig::CONFIG['host_os']
-
-    # Give VM 1/4 system memory & access to all cpu cores on the host
-    if host =~ /darwin/
-      cpus = `sysctl -n hw.ncpu`.to_i
-      # sysctl returns Bytes and we need to convert to MB
-      mem = `sysctl -n hw.memsize`.to_i / 1024 / 1024 / 4
-    elsif host =~ /linux/
-      cpus = `nproc`.to_i
-      # meminfo shows KB and we need to convert to MB
-      mem = `grep 'MemTotal' /proc/meminfo | sed -e 's/MemTotal://' -e 's/ kB//'`.to_i / 1024 / 4
-    else # sorry Windows folks, I can't help you
-      cpus = 2
-      mem = 1024
-    end
-
-    v.customize ["modifyvm", :id, "--memory", mem]
-    v.customize ["modifyvm", :id, "--cpus", cpus]
+    v.customize ["modifyvm", :id, "--cpuexecutioncap", "90"]
+    v.customize ["modifyvm", :id, "--memory", "4096"]
+    v.customize ["modifyvm", :id, "--cpus", 2]
+    v.customize ["modifyvm", :id, "--ioapic", "on"]
   end
 
   # Enable provisioning with chef solo, specifying a cookbooks path, roles
